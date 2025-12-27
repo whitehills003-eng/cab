@@ -1,0 +1,8 @@
+{
+  "name": "InRide Taxi Booking Platform",
+  "description": "A comprehensive taxi booking platform featuring driver onboarding with AI-assisted document verification, customer booking flows, and an administrative oversight dashboard.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}

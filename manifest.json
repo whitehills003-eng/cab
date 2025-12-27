@@ -1,0 +1,22 @@
+
+{
+  "short_name": "InRide",
+  "name": "InRide Taxi Booking Platform",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/color/192/taxi.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://img.icons8.com/color/512/taxi.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait"
+}
