@@ -21,7 +21,6 @@ const App: React.FC = () => {
   
   const [incomingNotification, setIncomingNotification] = useState<{title: string, body: string, icon: string} | null>(null);
 
-  // Core Data State
   const [superAdminEmail, setSuperAdminEmail] = useState(() => localStorage.getItem('inride_sa_email') || 'whitehills003@gmail.com');
   const [superAdminPassword, setSuperAdminPassword] = useState(() => localStorage.getItem('inride_sa_password') || 'Admin@WhiteHills2025');
   const [adminBalance, setAdminBalance] = useState<number>(() => parseFloat(localStorage.getItem('inride_admin_balance') || '2500.00'));
@@ -50,7 +49,6 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved).map((b: any) => ({ ...b, timestamp: new Date(b.timestamp) })) : [];
   });
 
-  // Persistence Effects
   useEffect(() => { localStorage.setItem('inride_drivers', JSON.stringify(drivers)); }, [drivers]);
   useEffect(() => { localStorage.setItem('inride_customers', JSON.stringify(customers)); }, [customers]);
   useEffect(() => { localStorage.setItem('inride_bookings', JSON.stringify(bookings)); }, [bookings]);
@@ -108,7 +106,7 @@ const App: React.FC = () => {
       documents: data.docs,
       rating: 4.5,
       totalRatings: 0,
-      location: { lat: 0, lng: 0 }, // Will be set by GPS
+      location: { lat: 0, lng: 0 },
       balance: 200.00 
     };
     setDrivers(prev => [...prev, newDriver]);
@@ -134,6 +132,10 @@ const App: React.FC = () => {
   const updateCustomerBalance = (id: string, amount: number) => setCustomers(prev => prev.map(c => c.id === id ? { ...c, balance: c.balance + amount } : c));
   const updateDriverBalance = (id: string, amount: number) => setDrivers(prev => prev.map(d => d.id === id ? { ...d, balance: d.balance + amount } : d));
   const updateAdminBalance = (amount: number) => setAdminBalance(prev => prev + amount);
+
+  const updateDriverLocation = (id: string, location: Location) => {
+    setDrivers(prev => prev.map(d => d.id === id ? { ...d, location } : d));
+  };
 
   const addBooking = (booking: Booking) => setBookings(prev => [booking, ...prev]);
 
@@ -188,7 +190,7 @@ const App: React.FC = () => {
         if (isRegisteringDriver) return <DriverRegistration onRegister={handleRegisterDriver} onCancel={() => setIsRegisteringDriver(false)} checkDuplicates={checkDuplicates} onNotify={notify} />;
         return user ? <CustomerDashboard userId={userId!} drivers={drivers} bookings={bookings.filter(b => b.customerId === userId)} onBook={addBooking} onAcceptOffer={acceptOffer} onCancelBooking={cancelBooking} onRateDriver={() => {}} balance={(user as CustomerProfile).balance} onTopUp={(amt) => updateCustomerBalance(userId!, amt)} /> : null;
       case 'DRIVER':
-        return user ? <DriverDashboard profile={user as DriverProfile} bookings={bookings} onUpdateBooking={updateBookingStatus} onTopUpWallet={(amt) => updateDriverBalance(userId!, amt)} /> : null;
+        return user ? <DriverDashboard profile={user as DriverProfile} bookings={bookings} onUpdateBooking={updateBookingStatus} onTopUpWallet={(amt) => updateDriverBalance(userId!, amt)} onUpdateLocation={(loc) => updateDriverLocation(userId!, loc)} /> : null;
       case 'ADMIN':
         return <AdminDashboard currentAdmin={user} drivers={drivers} admins={admins} onAddAdmin={handleAddAdmin} bookings={bookings} onUpdateDriver={(id, status, note) => setDrivers(prev => prev.map(d => d.id === id ? { ...d, status, aiVerificationNote: note } : d))} onDeleteDriver={(id) => setDrivers(prev => prev.filter(d => d.id !== id))} adminBalance={adminBalance} onAdminPayout={updateAdminBalance} adminBankDetails={adminBankDetails} onUpdateAdminBank={setAdminBankDetails} onUpdateSuperAdminCredentials={(email, pass) => { setSuperAdminEmail(email); setSuperAdminPassword(pass); }} />;
       default: return null;
