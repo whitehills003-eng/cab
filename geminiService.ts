@@ -1,10 +1,15 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Using a lazy initialization to prevent top-level ReferenceErrors on process in the browser
+const getAI = () => {
+  const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : '';
+  return new GoogleGenAI({ apiKey: apiKey || '' });
+};
 
 export const verifyDriverDocument = async (license: string, bio: string, vehicle: string, documents?: any) => {
   try {
+    const ai = getAI();
     const docSummary = documents ? Object.entries(documents).map(([k, v]) => `${k}: ${v}`).join(', ') : 'No additional docs provided';
     
     const response = await ai.models.generateContent({
@@ -37,12 +42,9 @@ export const verifyDriverDocument = async (license: string, bio: string, vehicle
   }
 };
 
-/**
- * AI-powered OTP Dispatcher
- * Simulates the generation of a professional notification message.
- */
 export const dispatchOTP = async (name: string, target: string, code: string, type: 'email' | 'phone') => {
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Generate a short, professional ${type === 'email' ? 'email body' : 'SMS message'} for a taxi app called "InRide".
@@ -68,6 +70,7 @@ export const dispatchOTP = async (name: string, target: string, code: string, ty
 
 export const estimateFareReasoning = async (pickup: string, destination: string) => {
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Provide a realistic fare estimate for a taxi ride from ${pickup} to ${destination} in a typical metropolitan area. Explain factors like distance, potential traffic, and time of day. Keep it concise.`,
@@ -80,6 +83,7 @@ export const estimateFareReasoning = async (pickup: string, destination: string)
 
 export const resolveLocation = async (query: string) => {
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `You are a geocoding service. Convert the user's location query into specific coordinates and a professional address.
@@ -112,6 +116,7 @@ export const resolveLocation = async (query: string) => {
 
 export const reverseGeocode = async (lat: number, lng: number) => {
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Identify the address, city, and country for these coordinates.
@@ -128,7 +133,6 @@ export const reverseGeocode = async (lat: number, lng: number) => {
           properties: {
             address: { type: Type.STRING },
             city: { type: Type.STRING },
-            // Fix: Type.COUNTRY is not a valid member of the Type enum; using Type.STRING instead.
             country: { type: Type.STRING }
           },
           required: ["address", "city", "country"]
@@ -147,6 +151,7 @@ export const reverseGeocode = async (lat: number, lng: number) => {
 
 export const searchLocations = async (query: string) => {
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Provide 5 realistic location suggestions for a taxi app in a big city based on this partial query: "${query}"
