@@ -3,8 +3,9 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 // Using a lazy initialization to prevent top-level ReferenceErrors on process in the browser
 const getAI = () => {
-  const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : '';
-  return new GoogleGenAI({ apiKey: apiKey || '' });
+  const env = (globalThis as any).process?.env || {};
+  const apiKey = env.API_KEY || "";
+  return new GoogleGenAI({ apiKey });
 };
 
 export const verifyDriverDocument = async (license: string, bio: string, vehicle: string, documents?: any) => {
@@ -35,7 +36,7 @@ export const verifyDriverDocument = async (license: string, bio: string, vehicle
       }
     });
 
-    return JSON.parse(response.text);
+    return JSON.parse(response.text ?? "{}");
   } catch (error) {
     console.error("AI Verification failed:", error);
     return { rating: 0, recommendation: "MANUAL_REVIEW", summary: "AI Verification service unavailable." };
@@ -56,7 +57,7 @@ export const dispatchOTP = async (name: string, target: string, code: string, ty
     });
     return {
       success: true,
-      message: response.text,
+      message: response.text ?? `Your InRide code is ${code}`,
       target
     };
   } catch (error) {
@@ -75,7 +76,7 @@ export const estimateFareReasoning = async (pickup: string, destination: string)
       model: "gemini-3-flash-preview",
       contents: `Provide a realistic fare estimate for a taxi ride from ${pickup} to ${destination} in a typical metropolitan area. Explain factors like distance, potential traffic, and time of day. Keep it concise.`,
     });
-    return response.text;
+    return response.text ?? "Fare calculation unavailable.";
   } catch (error) {
     return "Unable to calculate detailed fare reasoning at this moment.";
   }
@@ -107,7 +108,7 @@ export const resolveLocation = async (query: string) => {
       }
     });
 
-    return JSON.parse(response.text);
+    return JSON.parse(response.text ?? "{}");
   } catch (error) {
     console.error("AI Geocoding failed:", error);
     return null;
@@ -139,7 +140,7 @@ export const reverseGeocode = async (lat: number, lng: number) => {
         }
       }
     });
-    return JSON.parse(response.text);
+    return JSON.parse(response.text ?? "{}");
   } catch (error) {
     return {
       address: `Location at ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
@@ -178,7 +179,7 @@ export const searchLocations = async (query: string) => {
         }
       }
     });
-    return JSON.parse(response.text);
+    return JSON.parse(response.text ?? "[]");
   } catch (error) {
     return [];
   }
